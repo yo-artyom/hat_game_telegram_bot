@@ -1,3 +1,5 @@
+import re
+
 class Game:
     PLAYERS_NUM = 8;
     WORDS_PER_PLAYER = 5;
@@ -27,6 +29,9 @@ class Game:
         if len(self.words_by_player[player.id]) == self.WORDS_PER_PLAYER:
             return False
         if player.id not in self.words_by_player:
+            return False
+        #   check for empty word
+        if re.match("^\s*$", word):
             return False
 
         self.words_by_player[player.id].append(word)
