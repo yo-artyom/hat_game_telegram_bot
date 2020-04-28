@@ -6,7 +6,7 @@ from repositories.game  import GameRepository
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
     game_repo = GameRepository()
-    game = game_repo.find_by_player(1)
+    game = game_repo.find_by_player(player)
 
     if game.ready():
         update.message.reply_text('Игра заполнена, уходи')
@@ -22,7 +22,7 @@ def start(update, context):
 def add_words(update, context):
     player = PlayerFactory.from_tg_update(update)
     game_repo = GameRepository()
-    game = game_repo.find_by_player(1)
+    game = game_repo.find_by_player(player)
 
     if not game.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
@@ -44,7 +44,7 @@ def add_words(update, context):
 def reset_words(update, context):
     player = PlayerFactory.from_tg_update(update)
     game_repo = GameRepository()
-    game = game_repo.find_by_player(1)
+    game = game_repo.find_by_player(player)
 
     if not game.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
