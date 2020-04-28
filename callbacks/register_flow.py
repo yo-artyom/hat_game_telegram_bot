@@ -34,8 +34,6 @@ def add_words(update, context):
     parsed_words = re.sub(",\s*", ",", words).split(",")
 
     for word in parsed_words:
-        if word == "":
-            continue
         game.add_word(player, word)
 
     update.message.reply_text(__formatted_words(game, player))
