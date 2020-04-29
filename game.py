@@ -11,11 +11,12 @@ class Game:
         self.players = []
 
     def ready(self):
-        return  len(self.players) == self.PLAYERS_NUM
+        return self.__enough_players() and all(self.__enough_words_by_player(p) for p in self.players)
 
     def register_player(self, player):
-        if (len(self.players) == self.PLAYERS_NUM):
+        if self.__enough_players():
             return False
+        #   already registred
         if (player.id in map(lambda p: p.id, self.players)):
             return False
 
@@ -26,8 +27,9 @@ class Game:
         return True
 
     def add_word(self, player, word):
-        if len(self.words_by_player[player.id]) == self.WORDS_PER_PLAYER:
+        if self.__enough_words_by_player(player):
             return False
+        #   player isn't registred yet
         if player.id not in self.words_by_player:
             return False
         #   check for empty word
@@ -48,3 +50,22 @@ class Game:
 
     def player_registred(self, player):
         return player.id in map(lambda p: p.id, self.players)
+
+    def start(self):
+        if not self.ready():
+            return False
+
+        self.__put_words_in_hat()
+        return True
+
+    def __put_words_in_hat(self):
+        player_words = self.words_by_player.values()
+
+        for words in player_words:
+            self.hat.add_words(words)
+
+    def __enough_players(self):
+        return len(self.players) == self.PLAYERS_NUM
+
+    def __enough_words_by_player(self, player):
+        return len(self.words_by_player[player.id]) == self.WORDS_PER_PLAYER

@@ -2,5 +2,5 @@ class Hat:
     def __init__(self):
         self.words = []
 
-    def add_word(self, word):
-        self.words.append(word)
+    def add_words(self, words):
+        self.words.extend(words)
