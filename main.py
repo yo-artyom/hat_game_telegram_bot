@@ -38,6 +38,7 @@ def main():
     dispatcher.add_handler(CommandHandler("start", callbacks.register_flow.start))
     dispatcher.add_handler(CommandHandler("add", callbacks.register_flow.add_words))
     dispatcher.add_handler(CommandHandler("reset_words", callbacks.register_flow.reset_words))
+    dispatcher.add_handler(CommandHandler("ready", callbacks.register_flow.player_ready))
 
     updater.start_polling()
 

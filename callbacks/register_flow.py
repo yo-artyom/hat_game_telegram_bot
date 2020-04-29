@@ -2,6 +2,7 @@ import re
 
 from factories.player   import PlayerFactory
 from repositories.game  import GameRepository
+import callbacks.helpers.game as helpers
 
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
@@ -51,6 +52,24 @@ def reset_words(update, context):
     game.reset_words_for_player(player)
     update.message.reply_text('Я удалил твои слова')
 
+def player_ready(update, context):
+    player = PlayerFactory.from_tg_update(update)
+    game_repo = GameRepository()
+    game = game_repo.find_by_player(player)
+
+    if game.missing_words_for_player(player) > 0:
+        update.message.reply_text("Эй, все еще не хватает слово")
+        return
+
+    if game.ready():
+        game.start()
+
+        helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
+        # TODO: debug message:
+        all_words = ", ".join(game.hat.words)
+        helpers.send_message_to_all_players(context.bot, game, f"Debug message, all words: {all_words}")
+    else:
+        update.message.reply_text("Отлично, ожидаем других игроков")
 
 def __greeting_test(game):
     print(len(game.players))
@@ -66,7 +85,6 @@ def __greeting_test(game):
            f"Например: /add Блоб, Шлоб, Крот, Блев, Кнут"
 
 
-
 def __formatted_words(game, player):
     formatted_words = map(lambda word: f"• {word}", game.words_by_player[player.id])
 
@@ -79,5 +97,6 @@ def __formatted_words(game, player):
     return f"Ты добавил слова:\n"\
            f"{return_words}\n"\
            f"{missing_text}"\
-           f"Если ты хочешь удалить свои слова - отправь /reset_words"
+           f"Если ты хочешь удалить свои слова - отправь /reset_words\n" \
+           f"Если тебя устраивают твои слова и ты готов начать - отправь /ready"
 
