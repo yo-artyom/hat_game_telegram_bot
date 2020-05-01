@@ -9,7 +9,6 @@ import logging
 
 from game import Game
 from game.rules import Rules
-from player import Player
 from repositories.game import GameRepository
 
 import callbacks.register_flow
