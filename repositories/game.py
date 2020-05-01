@@ -7,8 +7,8 @@ class GameRepository(metaclass = MetaSingleton):
     def __init__(self, *args, **kwargs):
         self._games = []
 
-    def create(self, hat):
-        game = Game(hat)
+    def create(self, rules):
+        game = Game(rules)
         self._games.append(game)
         return True
 
