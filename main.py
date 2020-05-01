@@ -7,12 +7,13 @@ The hat game prototype
 
 import logging
 
-from hat                import Hat
-from game               import Game
-from player             import Player
-from repositories.game  import GameRepository
+from game import Game
+from game.rules import Rules
+from player import Player
+from repositories.game import GameRepository
 
 import callbacks.register_flow
+import callbacks.game_flow
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -22,13 +23,12 @@ import logging
 
 TOKEN = read_token()
 
-game_repo = GameRepository()
-hat = Hat()
-game = game_repo.create(hat)
+#   TODO: move this lines initialize to start handler when DB connection is ready
+game_rules = Rules(player_number=2, words_per_player=5)
+game = GameRepository().create(game_rules)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 
 def main():

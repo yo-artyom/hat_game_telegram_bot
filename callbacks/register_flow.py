@@ -1,31 +1,33 @@
 import re
 
-from factories.player   import PlayerFactory
-from repositories.game  import GameRepository
+from factories.player import PlayerFactory
+from repositories.game import GameRepository
+from game.starter import Starter
+from game.registrator import Registrator
 import callbacks.helpers.game as helpers
 
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
-    game_repo = GameRepository()
-    game = game_repo.find_by_player(player)
+    game = GameRepository().find_by_player(player)
+    registrator = Registrator(game)
 
-    if game.ready():
+    if game.validator.enough_players():
         update.message.reply_text('Игра заполнена, уходи')
         return
 
-    if not game.register_player(player):
+    if not registrator.register_player(player):
         update.message.reply_text('Невозможно')
         return
 
-    update.message.reply_text(__greeting_test(game))
+    update.message.reply_text(__greeting_text(game))
 
 
 def add_words(update, context):
     player = PlayerFactory.from_tg_update(update)
-    game_repo = GameRepository()
-    game = game_repo.find_by_player(player)
+    game = GameRepository().find_by_player(player)
+    registrator = Registrator(game)
 
-    if not game.player_registred(player):
+    if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
 
@@ -35,17 +37,17 @@ def add_words(update, context):
     parsed_words = re.sub(",\s*", ",", words).split(",")
 
     for word in parsed_words:
-        game.add_word(player, word)
+        registrator.register_player_word(player, word)
 
     update.message.reply_text(__formatted_words(game, player))
 
 
 def reset_words(update, context):
     player = PlayerFactory.from_tg_update(update)
-    game_repo = GameRepository()
-    game = game_repo.find_by_player(player)
+    game = GameRepository().find_by_player(player)
+    registrator = Registrator(game)
 
-    if not game.player_registred(player):
+    if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
 
@@ -54,24 +56,19 @@ def reset_words(update, context):
 
 def player_ready(update, context):
     player = PlayerFactory.from_tg_update(update)
-    game_repo = GameRepository()
-    game = game_repo.find_by_player(player)
+    game = GameRepository().find_by_player(player)
+    game_starter = Starter(game)
 
     if game.missing_words_for_player(player) > 0:
-        update.message.reply_text("Эй, все еще не хватает слово")
+        update.message.reply_text("Эй, все еще не хватает слов")
         return
 
-    if game.ready():
-        game.start()
-
+    if game_starter.call():
         helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
-        # TODO: debug message:
-        all_words = ", ".join(game.hat.words)
-        helpers.send_message_to_all_players(context.bot, game, f"Debug message, all words: {all_words}")
     else:
         update.message.reply_text("Отлично, ожидаем других игроков")
 
-def __greeting_test(game):
+def __greeting_text(game):
     print(len(game.players))
     if len(game.players) == 1:
         player_names_text = "Ты пока единственный игрок"
@@ -81,7 +78,7 @@ def __greeting_test(game):
 
     return f"Привет! Ты зарегистрирован в игру.\n"\
            f"{player_names_text}\n"\
-           f"Отправь мне команду /add и {game.WORDS_PER_PLAYER} слов через запятую\n"\
+           f"Отправь мне команду /add и {game.rules.words_per_player} слов через запятую\n"\
            f"Например: /add Блоб, Шлоб, Крот, Блев, Кнут"
 
 
@@ -99,4 +96,3 @@ def __formatted_words(game, player):
            f"{missing_text}"\
            f"Если ты хочешь удалить свои слова - отправь /reset_words\n" \
            f"Если тебя устраивают твои слова и ты готов начать - отправь /ready"
-
