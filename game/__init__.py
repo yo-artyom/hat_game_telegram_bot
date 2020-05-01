@@ -1,6 +1,9 @@
+from game.validator import Validator
+
 class Game:
     def __init__(self, rules):
         self.id = "HARDCODED"
+        self.validator = Validator(self)
         self.rules = rules
         self.words_by_player = {}
         self.players = []
@@ -27,8 +30,6 @@ class Game:
     def add_round(self, game_round):
         self.rounds.append(game_round)
 
-    def player_registred(self, player):
-        return player.id in map(lambda p: p.id, self.players)
 
     def missing_words_for_player(self, player):
         return (self.rules.words_per_player - len(self.words_by_player[player.id]))

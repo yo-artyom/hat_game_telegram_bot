@@ -11,7 +11,7 @@ def start(update, context):
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
 
-    if registrator.game_ready():
+    if game.validator.enough_players():
         update.message.reply_text('Игра заполнена, уходи')
         return
 
@@ -27,7 +27,7 @@ def add_words(update, context):
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
 
-    if not game.player_registred(player):
+    if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
 
@@ -47,7 +47,7 @@ def reset_words(update, context):
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
 
-    if not game.player_in_game(player):
+    if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
 
@@ -57,14 +57,14 @@ def reset_words(update, context):
 def player_ready(update, context):
     player = PlayerFactory.from_tg_update(update)
     game = GameRepository().find_by_player(player)
-    registrator = Registrator(game)
+    game_starter = Starter(game)
 
     if game.missing_words_for_player(player) > 0:
         update.message.reply_text("Эй, все еще не хватает слов")
         return
 
-    if registrator.game_ready():
-        Starter(game).call()
+    if game.validator.ready():
+        game_starter.call()
 
         helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
     else:
