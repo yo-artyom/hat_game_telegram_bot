@@ -1,6 +1,6 @@
 import re
 
-from factories.player import PlayerFactory
+from player.factory import PlayerFactory
 from repositories.game import GameRepository
 from game.starter import Starter
 from game.registrator import Registrator
