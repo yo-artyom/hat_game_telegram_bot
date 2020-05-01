@@ -63,9 +63,7 @@ def player_ready(update, context):
         update.message.reply_text("Эй, все еще не хватает слов")
         return
 
-    if game.validator.ready():
-        game_starter.call()
-
+    if game_starter.call():
         helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
     else:
         update.message.reply_text("Отлично, ожидаем других игроков")
