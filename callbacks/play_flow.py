@@ -1,4 +1,4 @@
-import re
+from re import sub
 from random import choice
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -14,10 +14,11 @@ def start_play(bot, game):
                                         text=__play_rules(), keyboard=__wait_keyboard())
 
 def start_show(update, context):
-    game, game_round, player, query = __set_env(update)
+    #   DEBUG:
+    game, game_round, player, showing_player, query = __set_env(update)
 
     if not Lock().free:
-        update.message.reply_text(f'Нет, сейчас показывает {Lock().player.name}')
+        update.message.reply_text(f'Нет, сейчас показывает {showing_player.name}')
         return
 
     Lock().obtain(player)
@@ -29,10 +30,14 @@ def start_show(update, context):
         __finish_round(context.bot, game)
 
 def word_guessed(update, context):
-    game, game_round, player, query = __set_env(update)
+    #   Debug:
+    print(f"WORD GUESSED {update.callback_query.data}")
 
-    guessed_word = re.sub("guessed_", "", update.callback_query.data)
+    game, game_round, player, showing_player, query = __set_env(update)
+
+    guessed_word = sub("guessed_", "", update.callback_query.data)
     game_round.guess_word(guessed_word)
+    game.scoreboard.increase_score(player)
 
     if not game_round.finished():
         word = game_round.random_word()
@@ -45,12 +50,13 @@ def word_guessed(update, context):
         __finish_round(context.bot, game)
 
 def timeoff_word_guessed(update, context):
-    game, game_round, player, query = __set_env(update)
+    game, game_round, player, showing_player, query = __set_env(update)
 
     Lock().release()
 
-    guessed_word = re.sub("guessed_timeoff_", "", update.callback_query.data)
+    guessed_word = sub("guessed_timeoff_", "", update.callback_query.data)
     game_round.guess_word(guessed_word)
+    game.scoreboard.increase_score(showing_player)
 
     if not game_round.finished():
         query.edit_message_text(text=__motivation_text(), reply_markup=__wait_keyboard())
@@ -58,7 +64,7 @@ def timeoff_word_guessed(update, context):
         __finish_round(context.bot, game)
 
 def timeoff(update, context):
-    game, game_round, player, query = __set_env(update)
+    game, game_round, player, showing_player, query = __set_env(update)
     Lock().release()
     query.edit_message_text(text=__motivation_text(), reply_markup=__wait_keyboard())
 
@@ -86,12 +92,16 @@ def __set_env(update):
     game = GameRepository().find_by_player(player)
     game_round = game.active_round()
     query = update.callback_query
+    showing_player = Lock().blocked_by
 
-    return game, game_round, player, query
+    return game, game_round, player, showing_player, query
 
 def __finish_round(bot, game):
     new_round = RoundFinisher(game).call()
+    Lock().release()
+
     helpers.send_message_to_all_players(bot, game, 'Раунд закончен!')
+    helpers.send_message_to_all_players(bot, game, helpers.pretty_scoreboard_text(game))
     helpers.send_keyboard_to_all_players(bot, game,
                                         text=f"Начинается раунд {game.active_round().number}",
                                         keyboard=__wait_keyboard())

@@ -15,6 +15,11 @@ def start(update, context):
         update.message.reply_text('Игра заполнена, уходи')
         return
 
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
+
+
     if not registrator.register_player(player):
         update.message.reply_text('Невозможно')
         return
@@ -29,6 +34,10 @@ def add_words(update, context):
 
     if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
+        return
+
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
         return
 
     # remove /add from begging of the message
@@ -47,6 +56,10 @@ def reset_words(update, context):
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
 
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
+
     if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
@@ -58,6 +71,10 @@ def player_ready(update, context):
     player = PlayerFactory.from_tg_update(update)
     game = GameRepository().find_by_player(player)
     game_starter = Starter(game)
+
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
 
     if game.missing_words_for_player(player) > 0:
         update.message.reply_text("Эй, все еще не хватает слов")

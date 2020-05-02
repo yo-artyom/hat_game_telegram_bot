@@ -1,4 +1,5 @@
 from game_round import GameRound
+from scoreboard import Scoreboard
 
 class Starter:
     def __init__(self, game):
@@ -9,6 +10,7 @@ class Starter:
             return False
 
         self.game.add_round(self.__build_first_round())
+        self.game.add_scoreboard(Scoreboard(self.game))
         return True
 
     def __build_first_round(self):

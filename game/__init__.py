@@ -8,6 +8,7 @@ class Game:
         self.words_by_player = {}
         self.players = []
         self.rounds = []
+        self.scoreboard = None
 
     def active_round(self):
         return self.rounds[-1]
@@ -33,6 +34,11 @@ class Game:
     def add_round(self, game_round):
         self.rounds.append(game_round)
 
+    def add_scoreboard(self, scoreboard):
+        self.scoreboard = scoreboard
 
     def missing_words_for_player(self, player):
         return (self.rules.words_per_player - len(self.words_by_player[player.id]))
+
+    def is_started(self):
+        return len(self.rounds) != 0
