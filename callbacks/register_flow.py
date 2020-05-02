@@ -16,12 +16,12 @@ def start(update, context):
         return
 
     if game.is_started():
-        update.message.reply_text('Игра уже начата')
+        update.message.reply_text('Игра уже начата, чего ты ещё хочешь?')
         return
 
     register_success = registrator.register_player(player)
     if not register_success:
-        update.message.reply_text('Невозможно')
+        update.message.reply_text('Невозможно 🙅')
         return
 
     if len(game.players) > 1:
@@ -39,7 +39,7 @@ def add_words(update, context):
         return
 
     if game.is_started():
-        update.message.reply_text('Игра уже начата')
+        update.message.reply_text('Игра уже начата, чего ты ещё хочешь?')
         return
 
     # remove /add from begging of the message
@@ -59,7 +59,7 @@ def reset_words(update, context):
     registrator = Registrator(game)
 
     if game.is_started():
-        update.message.reply_text('Игра уже начата')
+        update.message.reply_text('Игра уже начата, чего ты ещё хочешь?')
         return
 
     if not registrator.player_registred(player):
@@ -67,7 +67,7 @@ def reset_words(update, context):
         return
 
     game.reset_words_for_player(player)
-    update.message.reply_text('Я удалил твои слова')
+    update.message.reply_text('Я удалил твои слова, можешь написать новые')
 
 def player_ready(update, context):
     player = PlayerFactory.from_tg_update(update)
@@ -75,29 +75,32 @@ def player_ready(update, context):
     game_starter = Starter(game)
 
     if game.is_started():
-        update.message.reply_text('Игра уже начата')
+        update.message.reply_text('Игра уже начата, чего ты ещё хочешь?')
         return
 
     if game.missing_words_for_player(player) > 0:
-        update.message.reply_text("Эй, все еще не хватает слов")
+        update.message.reply_text("НУЖНО БОЛЬШЕ СЛОВ! 🧙")
         return
 
     if game_starter.call():
         callbacks.play_flow.start_play(context.bot, game)
     else:
-        update.message.reply_text("Отлично, ожидаем других игроков")
+        update.message.reply_text("Супер, ожидаем других игроков 🐕")
 
 def __greeting_text(game):
     if len(game.players) == 1:
-        player_names_text = "Ты пока единственный игрок"
+        player_names_text = "Ты пока единственный/ая игрок/НЯ"
     else:
         player_names = map(lambda player: player.name, game.players)
-        player_names_text = f"С тобой играют: {', '.join(player_names)}"
+        player_names_text = f"Сейчас с тобой в игре: {', '.join(player_names)}"
 
-    return f"Привет! Ты зарегистрирован в игру.\n"\
+    return f"Йо! Ты зарегистрирован_а в игру 🎉\n"\
            f"{player_names_text}\n"\
-           f"Отправь мне команду /add и {game.rules.words_per_player} слов через запятую\n"\
-           f"Например: /add Блоб, Шлоб, Крот, Блев, Кнут"
+           f"(Если кого-то нет в списке, ткните его палочкой — скорее всего, он не нажал /start)\n"\
+           "\n"\
+           f"🎩Отправь мне команду  /add и {game.rules.words_per_player} имен, которые хочешь положить в шляпу, через запятую\n"\
+           "\n"\
+           f"Пример: /add Блоб, Шлоб, Крот, Блев, Кнут"
 
 
 def __formatted_words(game, player):
@@ -111,10 +114,10 @@ def __formatted_words(game, player):
 
     return f"Ты добавил слова:\n"\
            f"{return_words}\n"\
-           f"{missing_text}"\
-           f"Если ты хочешь удалить свои слова - отправь /reset_words\n" \
-           f"Если тебя устраивают твои слова и ты готов начать - отправь /ready"
+           f"{missing_text}\n"\
+           f"⛔Если ты хочешь удалить свои слова — отправь /reset_words\n" \
+           f"✅Если тебя устраивают твои слова и ты готов начать — отправь /ready"
 
 def __new_player_message(game):
-    res = "Новый игрок. Сейчас в игре: "
+    res = "Новый игрок! Теперь в игре: "
     return res + ", ".join(map(lambda player: player.name, game.players))

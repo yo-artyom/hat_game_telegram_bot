@@ -10,7 +10,7 @@ def pretty_scoreboard_player_text(game, player):
     return f"{player.name} - {game.scoreboard.score_for(player)}"
 
 def pretty_scoreboard_text(game):
-    res = "Результаты\n"
+    res = "Результаты:\n"
     for player in game.players:
         res += f"{pretty_scoreboard_player_text(game, player)}\n"
     return res

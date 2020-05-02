@@ -9,7 +9,7 @@ from game_round.lock import Lock
 import callbacks.helpers.game as helpers
 
 def start_play(bot, game):
-    helpers.send_message_to_all_players(bot, game, 'Игра начата!')
+    helpers.send_message_to_all_players(bot, game, 'Игра начинается! 👒')
     helpers.send_message_to_all_players(bot, game, __play_rules())
     helpers.send_keyboard_to_all_players(bot, game,
                                         text="Тут будет слово", keyboard=__wait_keyboard())
@@ -69,27 +69,31 @@ def timeoff(update, context):
 
 
 def __wait_keyboard():
-    keyboard = [[InlineKeyboardButton("Начать показывать!", callback_data='word')]]
+    keyboard = [[InlineKeyboardButton("Показать слова! 👀", callback_data='word')]]
     return InlineKeyboardMarkup(keyboard)
 
 def __play_word_keyboard(word):
     keyboard = [
-        [InlineKeyboardButton("Слово угадано!", callback_data=f"guessed_{word}")],
-        [InlineKeyboardButton("Время, угадано", callback_data=f"guessed_timeoff_{word}"),
-         InlineKeyboardButton("Время, неугадано", callback_data='timeoff')]
+        [InlineKeyboardButton("Слово угадано 🎉", callback_data=f"guessed_{word}")],
+        [InlineKeyboardButton("Время, угадано ☑️", callback_data=f"guessed_timeoff_{word}"),
+         InlineKeyboardButton("Время, неугадано ❌", callback_data='timeoff')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def __play_rules():
-    return 'Правила игры:\n'\
-            'Сейчас я не умею следить за временем, поэтому убедитесь, что у вас есть таймер под рукой\n'\
-            'После того как вы поделились на команды и первая команда готова показывать - нажимайте на кнопку\n' \
-            'Если слово угадано - нажимайте слово угадано\n' \
-            'Если время вышло - нажимайте время, угадано/неудано\n'\
-            'После того как закончатся все слова вы увидете счет и начнется новый раунд'
+    return 'Особенности игры со мной 🤖\n'\
+            '\n'\
+            'Я еще не умею следить за временем, поэтому открывайте таймеры в телефончиках ⏲\n'\
+            '\n'\
+            'Поделитесь на команды (Гера не написал для меня эту часть кода, поэтому делитесь вручную или используйте этот сайт). Как только первая команда будет готова, пусть один из её игроков нажмёт на кнопку “показать слова!”\n' \
+            '\n'\
+            'Если слово угадано — нажимайте “слово угадано 🎉”\n' \
+            'Когда время вышло — нажимайте “время, угадано ☑️”, если последнее слово угадано и “время, неугадано ❌”, если нет.\n'\
+            '\n'\
+            'После того как закончатся все слова, вы увидете счёт, и начнется новый раунд'
 
 def __motivation_text():
-    return choice(["Отличный раунд", "Супер", "Было весело"])
+    return choice(["Клас", "Хорошая работа, Олег", "Супер", "Было весело"])
 
 def __set_env(update):
     player = PlayerFactory.from_tg_callback(update)
@@ -104,8 +108,8 @@ def __finish_round(bot, game):
     new_round = RoundFinisher(game).call()
     Lock().release()
 
-    helpers.send_message_to_all_players(bot, game, 'Раунд закончен!')
+    helpers.send_message_to_all_players(bot, game, 'Раунд закончен! 🌚')
     helpers.send_message_to_all_players(bot, game, helpers.pretty_scoreboard_text(game))
     helpers.send_keyboard_to_all_players(bot, game,
-                                        text=f"Начинается раунд {game.active_round().number}",
+                                        text=f"Начинается раунд {game.active_round().number} 🧢",
                                         keyboard=__wait_keyboard())
