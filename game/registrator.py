@@ -12,7 +12,7 @@ class Registrator:
             return False
 
         self.game.add_player(player)
-        print(f"REGISTRED PLAYER {player}")
+        print(f"REGISTRED PLAYER {player.name}")
 
         return True
 

@@ -10,15 +10,15 @@ import callbacks.helpers.game as helpers
 
 def start_play(bot, game):
     helpers.send_message_to_all_players(bot, game, 'Игра начата!')
+    helpers.send_message_to_all_players(bot, game, __play_rules())
     helpers.send_keyboard_to_all_players(bot, game,
-                                        text=__play_rules(), keyboard=__wait_keyboard())
+                                        text="Тут будет слово", keyboard=__wait_keyboard())
 
 def start_show(update, context):
-    #   DEBUG:
     game, game_round, player, showing_player, query = __set_env(update)
 
     if not Lock().free:
-        update.message.reply_text(f'Нет, сейчас показывает {showing_player.name}')
+        query.edit_message_text(f'Нет, сейчас показывает {showing_player.name}', reply_markup=__wait_keyboard())
         return
 
     Lock().obtain(player)
@@ -30,7 +30,6 @@ def start_show(update, context):
         __finish_round(context.bot, game)
 
 def word_guessed(update, context):
-    #   Debug:
     print(f"WORD GUESSED {update.callback_query.data}")
 
     game, game_round, player, showing_player, query = __set_env(update)
@@ -82,7 +81,12 @@ def __play_word_keyboard(word):
     return InlineKeyboardMarkup(keyboard)
 
 def __play_rules():
-    return 'Правила игры: текст текст текст'
+    return 'Правила игры:\n'\
+            'Сейчас я не умею следить за временем, поэтому убедитесь, что у вас есть таймер под рукой\n'\
+            'После того как вы поделились на команды и первая команда готова показывать - нажимайте на кнопку\n' \
+            'Если слово угадано - нажимайте слово угадано\n' \
+            'Если время вышло - нажимайте время, угадано/неудано\n'\
+            'После того как закончатся все слова вы увидете счет и начнется новый раунд'
 
 def __motivation_text():
     return choice(["Отличный раунд", "Супер", "Было весело"])

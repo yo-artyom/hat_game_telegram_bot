@@ -23,7 +23,7 @@ import logging
 TOKEN = read_token()
 
 #   TODO: move this lines initialize to start handler when DB connection is ready
-game_rules = Rules(player_number=1, words_per_player=5)
+game_rules = Rules(player_number=4, words_per_player=4)
 game = GameRepository().create(game_rules)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

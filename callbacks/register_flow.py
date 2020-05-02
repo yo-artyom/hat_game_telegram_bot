@@ -5,12 +5,12 @@ from repositories.game import GameRepository
 from game.starter import Starter
 from game.registrator import Registrator
 import callbacks.play_flow
+import callbacks.helpers.game as helpers
 
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
-
     if game.validator.enough_players():
         update.message.reply_text('Игра заполнена, уходи')
         return
@@ -19,11 +19,13 @@ def start(update, context):
         update.message.reply_text('Игра уже начата')
         return
 
-
-    if not registrator.register_player(player):
+    register_success = registrator.register_player(player)
+    if not register_success:
         update.message.reply_text('Невозможно')
         return
 
+    if len(game.players) > 1:
+        helpers.send_message_to_all_players(context.bot, game, __new_player_message(game))
     update.message.reply_text(__greeting_text(game))
 
 
@@ -86,7 +88,6 @@ def player_ready(update, context):
         update.message.reply_text("Отлично, ожидаем других игроков")
 
 def __greeting_text(game):
-    print(len(game.players))
     if len(game.players) == 1:
         player_names_text = "Ты пока единственный игрок"
     else:
@@ -113,3 +114,7 @@ def __formatted_words(game, player):
            f"{missing_text}"\
            f"Если ты хочешь удалить свои слова - отправь /reset_words\n" \
            f"Если тебя устраивают твои слова и ты готов начать - отправь /ready"
+
+def __new_player_message(game):
+    res = "Новый игрок. Сейчас в игре: "
+    return res + ", ".join(map(lambda player: player.name, game.players))
