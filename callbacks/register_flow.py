@@ -4,7 +4,7 @@ from player.factory import PlayerFactory
 from repositories.game import GameRepository
 from game.starter import Starter
 from game.registrator import Registrator
-import callbacks.helpers.game as helpers
+import callbacks.play_flow
 
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
@@ -64,7 +64,7 @@ def player_ready(update, context):
         return
 
     if game_starter.call():
-        helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
+        callbacks.play_flow.start_play(context.bot, game)
     else:
         update.message.reply_text("Отлично, ожидаем других игроков")
 

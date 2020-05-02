@@ -9,6 +9,9 @@ class Game:
         self.players = []
         self.rounds = []
 
+    def active_round(self):
+        return self.rounds[-1]
+
     def add_player(self, player):
         self.players.append(player)
         self.words_by_player[player.id] = []

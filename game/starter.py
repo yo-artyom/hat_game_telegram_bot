@@ -8,10 +8,9 @@ class Starter:
         if not self.game.validator.ready():
             return False
 
-        self.game.add_round(self.__create_round())
+        self.game.add_round(self.__build_first_round())
         return True
 
-    def __create_round(self):
-        first_round = GameRound(self.game.words(), 1)
-        self.game.add_round(first_round)
+    def __build_first_round(self):
+        return GameRound(self.game.words(), 1)
 
