@@ -4,7 +4,7 @@ from player.factory import PlayerFactory
 from repositories.game import GameRepository
 from game.starter import Starter
 from game.registrator import Registrator
-import callbacks.helpers.game as helpers
+import callbacks.play_flow
 
 def start(update, context):
     player = PlayerFactory.from_tg_update(update)
@@ -14,6 +14,11 @@ def start(update, context):
     if game.validator.enough_players():
         update.message.reply_text('Игра заполнена, уходи')
         return
+
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
+
 
     if not registrator.register_player(player):
         update.message.reply_text('Невозможно')
@@ -29,6 +34,10 @@ def add_words(update, context):
 
     if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
+        return
+
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
         return
 
     # remove /add from begging of the message
@@ -47,6 +56,10 @@ def reset_words(update, context):
     game = GameRepository().find_by_player(player)
     registrator = Registrator(game)
 
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
+
     if not registrator.player_registred(player):
         update.message.reply_text("Эй, сначала зарегистрируйся при помощи /start")
         return
@@ -59,12 +72,16 @@ def player_ready(update, context):
     game = GameRepository().find_by_player(player)
     game_starter = Starter(game)
 
+    if game.is_started():
+        update.message.reply_text('Игра уже начата')
+        return
+
     if game.missing_words_for_player(player) > 0:
         update.message.reply_text("Эй, все еще не хватает слов")
         return
 
     if game_starter.call():
-        helpers.send_message_to_all_players(context.bot, game, 'Игра начата!')
+        callbacks.play_flow.start_play(context.bot, game)
     else:
         update.message.reply_text("Отлично, ожидаем других игроков")
 

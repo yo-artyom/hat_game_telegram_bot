@@ -10,7 +10,7 @@ class GameRound:
         self.left_words.remove(word)
 
     def random_word(self):
-        return random.choice(self.left_words)
+        return choice(self.left_words)
 
     def finished(self):
         return len(self.left_words) == 0
